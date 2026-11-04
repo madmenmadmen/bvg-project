@@ -14,7 +14,7 @@ from .container import (
     FLAG_PERCHUNK, CHUNK_PRE_RLE,
 )
 from .errors import BvgError
-
+from . import __version__
 
 def _fmt_size(n):
     for unit in ("B", "KiB", "MiB", "GiB"):
@@ -206,7 +206,7 @@ def build_parser():
         prog="bvg",
         description="BVG - Universal Binary Vector Graphics tool")
     p.add_argument("--version", action="version",
-                   version=f"bvg {VERSION}.0")
+                   version=f"bvg {__version__}")
     sub = p.add_subparsers(dest="cmd", required=True)
 
     sp = sub.add_parser("info", help="print header info")

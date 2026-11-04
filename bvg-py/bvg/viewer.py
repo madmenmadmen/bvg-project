@@ -1,16 +1,30 @@
 from __future__ import annotations
 import sys
 import os
-from PyQt6.QtWidgets import (
-    QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-    QPushButton, QLabel, QFileDialog, QScrollArea, QMessageBox,
-)
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QAction
+
+# Ленивый импорт PyQt6
+try:
+    from PyQt6.QtWidgets import (
+        QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
+        QPushButton, QLabel, QFileDialog, QScrollArea, QMessageBox,
+    )
+    from PyQt6.QtCore import Qt
+    from PyQt6.QtGui import QAction
+
+    HAS_QT = True
+except ImportError:
+    HAS_QT = False
+
 from .container import read_bvg, describe
 
-class BvgViewer(QMainWindow):
+
+class BvgViewer(QMainWindow if HAS_QT else object):
     def __init__(self):
+        if not HAS_QT:
+            print("Error: PyQt6 is required for the viewer.")
+            print("Install it with: pip install bvg[qt]")
+            sys.exit(1)
+
         super().__init__()
         self.setWindowTitle("BVG Viewer")
         self.resize(1200, 800)
@@ -70,7 +84,12 @@ class BvgViewer(QMainWindow):
             f"{size} B (raw {info['total_uncompressed']} B, "
             f"{ratio:.2f}x)")
 
+
 def main():
+    if not HAS_QT:
+        print("Error: PyQt6 is required for the viewer.")
+        print("Install it with: pip install bvg[qt]")
+        sys.exit(1)
     app = QApplication(sys.argv)
     w = BvgViewer()
     w.show()
