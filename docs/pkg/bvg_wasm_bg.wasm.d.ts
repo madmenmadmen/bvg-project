@@ -1,0 +1,32 @@
+/* tslint:disable */
+/* eslint-disable */
+export const memory: WebAssembly.Memory;
+export const __wbg_wasmbvg_free: (a: number, b: number) => void;
+export const bvg_dump: (a: number, b: number) => [number, number, number, number];
+export const bvg_info: (a: number, b: number) => [number, number, number, number];
+export const wasmbvg_chunks: (a: number) => [number, number];
+export const wasmbvg_height: (a: number) => number;
+export const wasmbvg_load_images: (a: number) => any;
+export const wasmbvg_new: (a: number, b: number) => [number, number, number];
+export const wasmbvg_node_count: (a: number) => number;
+export const wasmbvg_render: (a: number, b: number, c: number) => [number, number];
+export const wasmbvg_width: (a: number) => number;
+export const rust_zstd_wasm_shim_calloc: (a: number, b: number) => number;
+export const rust_zstd_wasm_shim_free: (a: number) => void;
+export const rust_zstd_wasm_shim_malloc: (a: number) => number;
+export const rust_zstd_wasm_shim_memcmp: (a: number, b: number, c: number) => number;
+export const rust_zstd_wasm_shim_memcpy: (a: number, b: number, c: number) => number;
+export const rust_zstd_wasm_shim_memmove: (a: number, b: number, c: number) => number;
+export const rust_zstd_wasm_shim_memset: (a: number, b: number, c: number) => number;
+export const rust_zstd_wasm_shim_qsort: (a: number, b: number, c: number, d: number) => void;
+export const wasm_bindgen_c95f835529ef238d___convert__closures_____invoke___js_sys_4f52226bf96fefaa___Function_fn_wasm_bindgen_c95f835529ef238d___JsValue_____wasm_bindgen_c95f835529ef238d___sys__Undefined___js_sys_4f52226bf96fefaa___Function_fn_wasm_bindgen_c95f835529ef238d___JsValue_____wasm_bindgen_c95f835529ef238d___sys__Undefined_______true_: (a: number, b: number, c: any, d: any) => void;
+export const wasm_bindgen_c95f835529ef238d___convert__closures_____invoke___wasm_bindgen_c95f835529ef238d___JsValue__core_a09a0304ffb65c03___result__Result_____wasm_bindgen_c95f835529ef238d___JsError___true_: (a: number, b: number, c: any) => [number, number];
+export const __wbindgen_exn_store: (a: number) => void;
+export const __externref_table_alloc: () => number;
+export const __wbindgen_externrefs: WebAssembly.Table;
+export const __wbindgen_free: (a: number, b: number, c: number) => void;
+export const __wbindgen_malloc: (a: number, b: number) => number;
+export const __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
+export const __wbindgen_destroy_closure: (a: number, b: number) => void;
+export const __externref_table_dealloc: (a: number) => void;
+export const __wbindgen_start: () => void;

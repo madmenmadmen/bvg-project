@@ -1,0 +1,15 @@
+{
+  "name": "bvg-wasm",
+  "type": "module",
+  "version": "1.0.0",
+  "files": [
+    "bvg_wasm_bg.wasm",
+    "bvg_wasm.js",
+    "bvg_wasm.d.ts"
+  ],
+  "main": "bvg_wasm.js",
+  "types": "bvg_wasm.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}
