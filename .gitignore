@@ -6,12 +6,7 @@ out/
 *.class
 *.jar
 *.war
-*.lib
-*.a
-*.so
-*.dylib
 *.exe
-*.dll
 *.pdb
 *.obj
 *.o

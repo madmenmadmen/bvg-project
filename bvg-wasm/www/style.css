@@ -16,7 +16,7 @@ body {
 #canvas-wrap:active { cursor: grabbing; }
 
 #canvas {
-    background: #000;
+    background: transparent;
     box-shadow: 0 0 0 1px #3c3c3c, 0 8px 32px rgba(0,0,0,0.6);
     transform-origin: 0 0;
     max-width: none;
