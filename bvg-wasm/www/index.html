@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>BVG Viewer</title>
+    <!-- Bootstrap и Icons подключаем всегда (пусть лежат в кэше) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <script>
+        // Этот скрипт выполняется ДО отрисовки body
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('raw') === 'true') {
+            // Если raw режим, добавляем класс на html, чтобы CSS знал
+            document.documentElement.classList.add('raw-mode');
+        }
+    </script>
+</head>
+<body class="d-flex flex-column vh-100">
+
+    <!-- Этот блок будет скрыт в raw режиме через CSS -->
+    <nav class="navbar navbar-expand bg-body-tertiary border-bottom px-3 ui-element">
+        <span class="navbar-brand fw-bold text-primary">BVG</span>
+        <span class="navbar-text small text-secondary me-3">Binary Vector Graphics</span>
+
+        <div class="d-flex gap-2 align-items-center">
+            <label class="btn btn-outline-primary btn-sm mb-0">
+                <i class="bi bi-folder2-open"></i> Open .bvg
+                <input type="file" id="file" accept=".bvg" hidden>
+            </label>
+
+            <div class="btn-group btn-group-sm" role="group">
+                <button class="btn btn-outline-secondary" id="btn-zoom-out"><i class="bi bi-zoom-out"></i></button>
+                <span class="btn btn-outline-secondary disabled" id="zoom-label" style="min-width:70px;">100%</span>
+                <button class="btn btn-outline-secondary" id="btn-zoom-in"><i class="bi bi-zoom-in"></i></button>
+            </div>
+
+            <button class="btn btn-outline-secondary btn-sm" id="btn-fit"><i class="bi bi-arrows-fullscreen"></i> Fit</button>
+            <button class="btn btn-outline-secondary btn-sm" id="btn-reset"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
+        </div>
+
+        <div class="ms-auto small text-secondary text-truncate" id="info" style="max-width: 300px;">No file</div>
+    </nav>
+
+    <!-- Canvas всегда на месте -->
+    <main class="flex-grow-1 overflow-auto d-flex align-items-center justify-content-center" id="canvas-wrap">
+        <canvas id="canvas" width="1" height="1"></canvas>
+    </main>
+
+    <!-- Этот блок будет скрыт в raw режиме через CSS -->
+    <footer class="d-flex gap-4 px-3 py-1 small text-secondary bg-body-tertiary border-top ui-element">
+        <span id="status-file"><i class="bi bi-file-earmark"></i> -</span>
+        <span id="status-size"><i class="bi bi-aspect-ratio"></i> -</span>
+        <span id="status-zoom"><i class="bi bi-search"></i> -</span>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="/app.js"></script>
+</body>
+</html>

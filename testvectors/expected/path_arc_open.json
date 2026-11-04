@@ -1,0 +1,34 @@
+{
+  "file": "path_arc_open.bvg",
+  "width": 100,
+  "height": 100,
+  "chunks": [
+    {
+      "type": "COLR",
+      "hex": "0100ff0000ff",
+      "meta": {
+        "codec": 1,
+        "level": 9,
+        "use_pre": true
+      }
+    },
+    {
+      "type": "STYL",
+      "hex": "01000000000100000000004000000000804000ff00",
+      "meta": {
+        "codec": 1,
+        "level": 9,
+        "use_pre": true
+      }
+    },
+    {
+      "type": "NODE",
+      "hex": "0600000000000200000000204100002041040000a0410000a0410000000000010000484200004842",
+      "meta": {
+        "codec": 1,
+        "level": 9,
+        "use_pre": true
+      }
+    }
+  ]
+}

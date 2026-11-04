@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bvg"
+version = "1.0.0"
+description = "BVG - Universal Binary Vector Graphics container"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "BVG contributors" }]
+dependencies = []
+
+[project.optional-dependencies]
+zstd = ["zstandard>=0.21"]
+lz4  = ["lz4>=4.0"]
+img  = ["Pillow>=10"]
+qt   = ["PyQt6>=6.5"]
+all  = ["zstandard>=0.21", "lz4>=4.0", "Pillow>=10", "PyQt6>=6.5"]
+dev  = ["pytest>=7", "zstandard>=0.21", "lz4>=4.0", "Pillow>=10"]
+
+[project.scripts]
+bvg = "bvg.cli:main"
+bvg-viewer = "bvg.viewer:main"
+
+[tool.setuptools.packages.find]
+include = ["bvg*"]

@@ -1,0 +1,16 @@
+{
+  "file": "empty.bvg",
+  "width": 1,
+  "height": 1,
+  "chunks": [
+    {
+      "type": "NODE",
+      "hex": "",
+      "meta": {
+        "codec": 1,
+        "level": 9,
+        "use_pre": true
+      }
+    }
+  ]
+}

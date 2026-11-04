@@ -1,0 +1,14 @@
+[package]
+name = "bvg-qt"
+version = "1.0.0"
+edition = "2021"
+
+[lib]
+crate-type = ["staticlib"]
+
+[dependencies]
+bvg = { path = "../bvg-rust" }
+
+[profile.release]
+lto = false
+opt-level = 2

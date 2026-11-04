@@ -1,0 +1,16 @@
+[package]
+name = "bvg"
+version = "1.0.0"
+edition = "2021"
+
+[dependencies]
+zstd = "0.13"
+lz4_flex = "0.11"
+flate2 = "1.0"
+
+[dev-dependencies]
+walkdir = "2"
+
+[[bin]]
+name = "bvg-rust"
+path = "src/bin/main.rs"

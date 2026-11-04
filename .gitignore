@@ -1,0 +1,81 @@
+# --- Build artifacts ---
+build/
+target/
+dist/
+out/
+*.class
+*.jar
+*.war
+*.lib
+*.a
+*.so
+*.dylib
+*.exe
+*.dll
+*.pdb
+*.obj
+*.o
+
+# --- Gradle ---
+.gradle/
+gradle-app.setting
+!gradle-wrapper.jar
+
+# --- Rust ---
+Cargo.lock
+**/target/
+
+# --- WASM ---
+pkg/
+node/pkg/
+www/pkg/
+*.wasm
+*.wasm.map
+wasm-pack.log
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+dist/
+build/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# --- IDE / Editors ---
+.vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/
+*.swp
+*.swo
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- CMake ---
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.vcxproj*
+*.sln
+*.user
+
+# --- Qt ---
+*.pro.user
+moc_*.cpp
+qrc_*.cpp
+ui_*.h
