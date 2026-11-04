@@ -1,0 +1,61 @@
+body {
+    overflow: hidden;
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+}
+
+#canvas-wrap {
+    background:
+        linear-gradient(45deg, #1a1a1a 25%, transparent 25%),
+        linear-gradient(-45deg, #1a1a1a 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #1a1a1a 75%),
+        linear-gradient(-45deg, transparent 75%, #1a1a1a 75%);
+    background-size: 24px 24px;
+    background-position: 0 0, 0 12px, 12px -12px, -12px 0px;
+    cursor: grab;
+}
+#canvas-wrap:active { cursor: grabbing; }
+
+#canvas {
+    background: #000;
+    box-shadow: 0 0 0 1px #3c3c3c, 0 8px 32px rgba(0,0,0,0.6);
+    transform-origin: 0 0;
+    max-width: none;
+    image-rendering: auto;
+}
+
+/* --- RAW MODE --- */
+.raw-mode .ui-element {
+    display: none !important;
+}
+
+.raw-mode body {
+    overflow: hidden !important;
+    background: transparent !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.raw-mode #canvas-wrap {
+    padding: 0 !important;
+    margin: 0 !important;
+    background: transparent !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    display: block !important;
+    align-items: unset !important;
+    justify-content: unset !important;
+    flex-grow: unset !important;
+    overflow: hidden !important;
+}
+
+.raw-mode #canvas {
+    box-shadow: none !important;
+    border: none !important;
+    transform: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: block !important;
+    max-width: none !important;
+    max-height: none !important;
+    object-fit: fill !important;
+}
