@@ -1,4 +1,4 @@
-import init, { WasmBvg } from '/pkg/bvg_wasm.js';
+import init, { WasmBvg } from './pkg/bvg_wasm.js';
 
 let bvg = null;
 let zoom = 1.0;
