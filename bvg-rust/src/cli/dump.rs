@@ -35,7 +35,7 @@ pub fn run(args: &[String]) -> ExitCode {
             return ExitCode::from(1);
         }
     };
-    let f = match BvgFile::read_from_bytes(&data) {
+    let mut f = match BvgFile::read_from_bytes(&data) {
         Ok(f) => f,
         Err(e) => {
             eprintln!("error: {:?}", e);
@@ -43,15 +43,25 @@ pub fn run(args: &[String]) -> ExitCode {
         }
     };
 
+    // snapshot meta до get_chunk (borrow checker)
+    let meta_snapshot: Vec<(String, u8, u8, bool)> = f.order.iter()
+        .map(|t| {
+            let m = f.meta.get(t);
+            (t.clone(),
+             m.map(|m| m.codec).unwrap_or(0),
+             m.map(|m| m.level).unwrap_or(0),
+             m.map(|m| m.use_pre).unwrap_or(false))
+        })
+        .collect();
+
     let mut js = String::new();
     js.push_str("{\n  \"chunks\": [\n");
     let mut first = true;
-    for t in &f.order {
-        let raw = &f.chunks[t];
-        let m = f.meta.get(t);
-        let codec = m.map(|m| m.codec).unwrap_or(0);
-        let level = m.map(|m| m.level).unwrap_or(0);
-        let use_pre = m.map(|m| m.use_pre).unwrap_or(false);
+    for (t, codec, level, use_pre) in &meta_snapshot {
+        let raw = match f.get_chunk(t) {
+            Some(r) => r,
+            None => continue,
+        };
         if !first {
             js.push_str(",\n");
         }

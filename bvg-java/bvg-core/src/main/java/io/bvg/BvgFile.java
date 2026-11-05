@@ -21,6 +21,7 @@ public final class BvgFile {
 
     public final Map<String, byte[]> chunks = new LinkedHashMap<>();
     public final Map<String, ChunkMeta> meta = new HashMap<>();
+    public final List<String> order = new ArrayList<>();
 
     public static final class ChunkMeta {
         public int codec;
@@ -76,6 +77,7 @@ public final class BvgFile {
             int lv  = pc ? e.level   : h.level;
             boolean pre = pc && (e.flags & Generated.CHUNK_PRE_RLE) != 0;
             f.meta.put(t, new ChunkMeta(cid, lv, pre));
+            f.order.add(t);
         }
         return f;
     }
@@ -111,8 +113,9 @@ public final class BvgFile {
     }
 
     public void setChunk(String type, byte[] payload,
-                         int codec, int level, boolean usePre) {
-        if (!chunks.containsKey(type)) {
+                     int codec, int level, boolean usePre) {
+        if (!chunks.containsKey(type) && !order.contains(type)) {
+            order.add(type);
         }
         chunks.put(type, payload);
         meta.put(type, new ChunkMeta(codec, level, usePre));

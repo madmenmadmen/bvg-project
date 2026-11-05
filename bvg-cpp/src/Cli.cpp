@@ -105,7 +105,7 @@ int cmd_recompress(int argc, char** argv) {
     }
 }
 
-int cmd_dump(int argc, char** argv) {
+static int cmd_dump(int argc, char** argv) {
     if (argc < 2) {
         std::cerr << "usage: bvg-cpp-cli dump <file> [-o out.json]\n";
         return 2;
@@ -119,21 +119,26 @@ int cmd_dump(int argc, char** argv) {
     }
     try {
         auto f = BvgFile::read(in);
+
+        // копия порядка: getChunk мутирует chunks
+        std::vector<std::string> order = f.order;
+
         std::ostringstream js;
         js << "{\n  \"chunks\": [\n";
         bool first = true;
-        for (auto& t : f.order) {
-            auto it = f.chunks.find(t);
-            if (it == f.chunks.end()) continue;
-            const auto& raw = it->second;
+        for (auto& t : order) {
+            auto* raw = f.getChunk(t);
+            if (!raw) continue;
+
             auto mit = f.meta.find(t);
-            int codec = (mit != f.meta.end()) ? mit->second.codec : 0;
-            int level = (mit != f.meta.end()) ? mit->second.level : 0;
+            int codec   = (mit != f.meta.end()) ? mit->second.codec : 0;
+            int level   = (mit != f.meta.end()) ? mit->second.level : 0;
             bool usePre = (mit != f.meta.end()) && mit->second.usePre;
+
             if (!first) js << ",\n";
             first = false;
             js << "    {\n";
-            js << "      \"hex\": \"" << hex(raw) << "\",\n";
+            js << "      \"hex\": \"" << hex(*raw) << "\",\n";
             js << "      \"meta\": {\n";
             js << "        \"codec\": " << codec << ",\n";
             js << "        \"level\": " << level << ",\n";
@@ -147,6 +152,7 @@ int cmd_dump(int argc, char** argv) {
         js << "  \"height\": " << f.height << ",\n";
         js << "  \"width\": " << f.width << "\n";
         js << "}\n";
+
         if (!out.empty()) {
             std::ofstream o(out, std::ios::binary);
             o << js.str();

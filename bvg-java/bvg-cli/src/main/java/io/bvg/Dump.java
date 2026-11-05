@@ -3,15 +3,10 @@ package io.bvg;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
-/**
- * CLI: dump BVG file contents as JSON (for conformance testing).
- *
- * Usage:
- *   java io.bvg.Dump &lt;file.bvg&gt;
- *   java io.bvg.Dump &lt;file.bvg&gt; -o out.json
- */
 public final class Dump {
     private Dump() {}
 
@@ -39,18 +34,29 @@ public final class Dump {
         }
     }
 
-    static String toJson(String fileName, BvgFile f) {
+    static String toJson(String fileName, BvgFile f) throws BvgException {
         StringBuilder sb = new StringBuilder();
         sb.append("{\n");
         sb.append("  \"chunks\": [\n");
+
+        List<String> order = new ArrayList<>(f.order);
+        if (order.isEmpty()) {
+            order = new ArrayList<>(f.chunks.keySet());
+            if (order.isEmpty() && f.meta != null && !f.meta.isEmpty()) {
+                order = new ArrayList<>(f.meta.keySet());
+            }
+        }
+
         boolean first = true;
-        for (var entry : f.chunks.entrySet()) {
-            String t = entry.getKey();
-            byte[] raw = entry.getValue();
+        for (String t : order) {
+            byte[] raw = f.getChunk(t);   // lazy, throws BvgException
+            if (raw == null) continue;
+
             BvgFile.ChunkMeta m = f.meta.get(t);
             int codec = m != null ? m.codec : 0;
             int level = m != null ? m.level : 0;
             boolean usePre = m != null && m.usePre;
+
             if (!first) sb.append(",\n");
             first = false;
             sb.append("    {\n");

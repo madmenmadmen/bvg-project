@@ -122,15 +122,20 @@ def cmd_dump(args):
     """Dump file contents as JSON (for conformance testing)."""
     f = read_bvg(args.file)
     chunks = []
-    for t in f.chunk_order:
-        meta = f.chunk_meta.get(t, {})
+    # копия порядка, чтобы не зависеть от ленивой загрузки
+    order = list(f.chunk_order)
+    for t in order:
+        raw = f.get_chunk(t)
+        if raw is None:
+            continue
+        m = f.chunk_meta.get(t, {})
         chunks.append({
             "type": t.decode("ascii", "replace"),
-            "hex": binascii.hexlify(f.chunks[t]).decode("ascii"),
+            "hex": binascii.hexlify(raw).decode("ascii"),
             "meta": {
-                "codec": meta.get("codec", 0),
-                "level": meta.get("level", 0),
-                "use_pre": meta.get("use_pre", False),
+                "codec": m.get("codec", 0),
+                "level": m.get("level", 0),
+                "use_pre": m.get("use_pre", False),
             },
         })
     out = {
