@@ -9,9 +9,7 @@ echo.
 REM --- Java ---
 echo [1/5] bvg-java (cli + viewer)
 pushd "%~dp0bvg-java"
-call gradlew.bat cliJar --no-daemon
-if errorlevel 1 goto :err
-call gradlew.bat viewerJar --no-daemon
+call gradlew.bat build --no-daemon
 if errorlevel 1 goto :err
 popd
 echo.

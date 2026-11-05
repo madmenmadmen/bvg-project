@@ -9,8 +9,8 @@ import java.util.Locale;
  * CLI: dump BVG file contents as JSON (for conformance testing).
  *
  * Usage:
- *   java io.bvg.Dump <file.bvg>
- *   java io.bvg.Dump <file.bvg> -o out.json
+ *   java io.bvg.Dump &lt;file.bvg&gt;
+ *   java io.bvg.Dump &lt;file.bvg&gt; -o out.json
  */
 public final class Dump {
     private Dump() {}

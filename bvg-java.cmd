@@ -1,6 +1,6 @@
 @echo off
 setlocal
-set "ROOT=%~dp0\bvg-java"
+set "ROOT=%~dp0\bvg-java\bvg-cli"
 set "JAR=%ROOT%\build\libs\bvg-java-cli.jar"
 if not exist "%JAR%" (
     echo bvg-java not built: %JAR%
