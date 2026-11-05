@@ -145,12 +145,13 @@ int main(int argc, char** argv) {
         QString path = QFileDialog::getOpenFileName(&w, "Open BVG", "", "*.bvg");
         if (path.isEmpty()) return;
         try {
-            auto f = bvg::BvgFile::read(path.toStdString());
+            auto f = std::make_shared<bvg::BvgFile>(
+                bvg::BvgFile::read(std::filesystem::path(path.toStdWString())));
             auto* canvas = new BvgCanvas(f);
             scene->clear();
             scene->addWidget(canvas);
             statusFile->setText(QFileInfo(path).fileName());
-            statusSize->setText(QString("%1×%2").arg(f.width).arg(f.height));
+            statusSize->setText(QString("%1×%2").arg(f->width).arg(f->height));
             statusZoom->setText("Zoom: 100%");
             view->fitInView(scene->itemsBoundingRect(), Qt::KeepAspectRatio);
             updateZoomLabel();

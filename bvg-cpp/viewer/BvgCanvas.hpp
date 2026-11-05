@@ -9,6 +9,7 @@
 #include <QPainterPath>
 #include <QPolygonF>
 #include <array>
+#include <memory>
 
 #include "bvg/BvgFile.hpp"
 #include "bvg/Generated.hpp"
@@ -16,7 +17,8 @@
 class BvgCanvas : public QWidget {
     Q_OBJECT
 public:
-    explicit BvgCanvas(const bvg::BvgFile& f, QWidget* parent = nullptr);
+    explicit BvgCanvas(std::shared_ptr<bvg::BvgFile> f,
+                       QWidget* parent = nullptr);
     QSize sizeHint() const override;
 
 protected:
@@ -29,7 +31,7 @@ private:
     QPainterPath buildPath(const std::vector<bvg::PathCmd>& cmds) const;
     void drawRange(QPainter& p, size_t start, size_t end);
 
-    bvg::BvgFile file_;
+    std::shared_ptr<bvg::BvgFile> file_;
     QVector<std::array<int, 4>> palette_;
     QVector<bvg::Gradient> grads_;
     QVector<bvg::Style> styles_;

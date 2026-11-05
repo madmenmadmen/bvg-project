@@ -455,7 +455,7 @@ function __wbg_get_imports() {
             arg0.translate(arg1, arg2);
         }, arguments); },
         __wbindgen_generic_0000000000000001: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 111, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 112, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_c95f835529ef238d___convert__closures_____invoke___wasm_bindgen_c95f835529ef238d___JsValue__core_a09a0304ffb65c03___result__Result_____wasm_bindgen_c95f835529ef238d___JsError___true_);
             return ret;
         },

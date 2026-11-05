@@ -85,41 +85,37 @@ static QPainterPath svgArcPath(double x1, double y1,
     return path;
 }
 
-BvgCanvas::BvgCanvas(const bvg::BvgFile& f, QWidget* parent)
-    : QWidget(parent), file_(f)
+BvgCanvas::BvgCanvas(std::shared_ptr<bvg::BvgFile> f, QWidget* parent)
+    : QWidget(parent), file_(std::move(f))
 {
-    setMinimumSize(f.width, f.height);
+    setMinimumSize(file_->width, file_->height);
 
-    auto it = f.chunks.find("COLR");
-    if (it != f.chunks.end()) {
-        auto cols = bvg::generated::unpackColr(it->second);
+    if (auto* raw = file_->getChunk("COLR")) {
+        auto cols = bvg::generated::unpackColr(*raw);
         for (auto& c : cols) palette_.push_back({c[0], c[1], c[2], c[3]});
     }
-    it = f.chunks.find("GRAD");
-    if (it != f.chunks.end()) {
-        auto gs = bvg::generated::unpackGrad(it->second);
+    if (auto* raw = file_->getChunk("GRAD")) {
+        auto gs = bvg::generated::unpackGrad(*raw);
         for (auto& g : gs) grads_.push_back(g);
     }
-    it = f.chunks.find("STYL");
-    if (it != f.chunks.end()) {
-        auto ss = bvg::generated::unpackStyl(it->second);
+    if (auto* raw = file_->getChunk("STYL")) {
+        auto ss = bvg::generated::unpackStyl(*raw);
         for (auto& s : ss) styles_.push_back(s);
     }
-    it = f.chunks.find("NODE");
-    if (it != f.chunks.end()) {
-        auto ns = bvg::generated::unpackNode(it->second);
+    if (auto* raw = file_->getChunk("NODE")) {
+        auto ns = bvg::generated::unpackNode(*raw);
         for (auto& n : ns) nodes_.push_back(n);
     }
-    it = f.chunks.find("IMGS");
-    if (it != f.chunks.end()) {
-        auto imgs = bvg::generated::unpackImages(it->second);
+    if (auto* raw = file_->getChunk("IMGS")) {
+        auto imgs = bvg::generated::unpackImages(*raw);
         for (auto& im : imgs) {
             QImage img;
             if (im.format == bvg::generated::IMG_RAW_RGBA) {
                 img = QImage(im.data.data(), im.width, im.height,
                              im.width * 4, QImage::Format_RGBA8888).copy();
             } else {
-                img.loadFromData(im.data.data(), static_cast<int>(im.data.size()));
+                img.loadFromData(im.data.data(),
+                                 static_cast<int>(im.data.size()));
             }
             images_.push_back(img);
         }
@@ -127,7 +123,7 @@ BvgCanvas::BvgCanvas(const bvg::BvgFile& f, QWidget* parent)
 }
 
 QSize BvgCanvas::sizeHint() const {
-    return QSize(file_.width, file_.height);
+    return QSize(file_->width, file_->height);
 }
 
 QColor BvgCanvas::colorAt(int idx) const {

@@ -28,7 +28,7 @@ impl WasmBvg {
     #[wasm_bindgen(constructor)]
     pub fn new(data: &[u8]) -> Result<WasmBvg, JsValue> {
         console_error_panic_hook::set_once();
-        let f = BvgFile::read_from_bytes(data)
+        let mut f = BvgFile::read_from_bytes(data)
             .map_err(|e| JsValue::from_str(&format!("read: {e}")))?;
 
         let palette = f.get_chunk("COLR")
@@ -545,17 +545,25 @@ pub fn bvg_info(data: &[u8]) -> Result<String, JsValue> {
 
 #[wasm_bindgen]
 pub fn bvg_dump(data: &[u8]) -> Result<String, JsValue> {
-    let f = BvgFile::read_from_bytes(data)
+    let mut f = BvgFile::read_from_bytes(data)
         .map_err(|e| JsValue::from_str(&format!("read: {e}")))?;
+
+    let meta_snapshot: Vec<(String, u8, u8, bool)> = f.order.iter()
+        .map(|t| {
+            let m = f.meta.get(t);
+            (t.clone(),
+             m.map(|m| m.codec).unwrap_or(0),
+             m.map(|m| m.level).unwrap_or(0),
+             m.map(|m| m.use_pre).unwrap_or(false))
+        })
+        .collect();
+
     let mut js = String::new();
     js.push_str("{\n  \"chunks\": [\n");
     let mut first = true;
-    for t in &f.order {
-        let raw = &f.chunks[t];
-        let m = f.meta.get(t);
-        let codec = m.map(|m| m.codec).unwrap_or(0);
-        let level = m.map(|m| m.level).unwrap_or(0);
-        let use_pre = m.map(|m| m.use_pre).unwrap_or(false);
+    for (t, codec, level, use_pre) in &meta_snapshot {
+        let raw = f.get_chunk(t)
+            .ok_or_else(|| JsValue::from_str(&format!("missing chunk: {t}")))?;
         if !first { js.push_str(",\n"); }
         first = false;
         js.push_str("    {\n");

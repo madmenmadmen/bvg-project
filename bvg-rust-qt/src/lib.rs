@@ -19,8 +19,6 @@ unsafe fn node<'a>(h: *const BvgHandle, idx: usize) -> Option<&'a Node> {
     hh.nodes.get(idx)
 }
 
-// ---------- open/free ----------
-
 #[no_mangle]
 pub extern "C" fn bvg_open(path: *const c_char) -> *mut BvgHandle {
     if path.is_null() { return std::ptr::null_mut(); }
@@ -30,7 +28,7 @@ pub extern "C" fn bvg_open(path: *const c_char) -> *mut BvgHandle {
         Err(_) => return std::ptr::null_mut(),
     };
     match BvgFile::read(s) {
-        Ok(f) => {
+        Ok(mut f) => {
             let palette = f.get_chunk("COLR")
                 .and_then(|r| unpack_colr(r).ok())
                 .unwrap_or_default();

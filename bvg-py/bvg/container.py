@@ -21,21 +21,86 @@ CHUNK_SIZE_P = struct.calcsize(CHUNK_FMT_P)  # 15
 
 CHUNK_PRE_RLE = 1 << 0
 
-
 class BvgFile:
-    def __init__(self, width: int, height: int):
+    def __init__(self, width, height):
         self.width = int(width)
         self.height = int(height)
-        self.chunks = {}
-        self.chunk_order = []
-        self.chunk_meta = {}
-        self.meta = {}
+        self.chunks: dict[bytes, bytes] = {}
+        self.chunk_order: list[bytes] = []
+        self.chunk_meta: dict[bytes, dict] = {}
+        self.meta: dict = {}
+        self._raw: bytes | None = None
+        self._entries: list[tuple] = []
+        self._data_start: int = 0
+        self._per_chunk: bool = False
+        self._dirty: set[bytes] = set()
+
+    @classmethod
+    def read(cls, path) -> "BvgFile":
+        with open(path, "rb") as f:
+            data = f.read()
+        if len(data) < HEADER_SIZE:
+            raise BvgFormatError("file too small for BVG header")
+        (magic, ver, flags, w, h, nchunks,
+         g_codec, g_level, total) = struct.unpack_from(HEADER_FMT, data, 0)
+        if magic != MAGIC:
+            raise BvgFormatError(f"bad magic: {magic!r}")
+        if ver != VERSION:
+            raise BvgVersionError(f"unsupported version: {ver}")
+        if struct.unpack_from("<H", data, 22)[0] != 0:
+            raise BvgFormatError("reserved must be zero")
+
+        per_chunk = bool(flags & FLAG_PERCHUNK)
+        rec = CHUNK_SIZE_P if per_chunk else CHUNK_SIZE_S
+        table_off = HEADER_SIZE
+        if table_off + rec * nchunks > len(data):
+            raise BvgFormatError("chunk table truncated")
+        data_start = table_off + rec * nchunks
+
+        doc = cls(w, h)
+        doc.meta["u32xy"] = bool(flags & FLAG_U32XY)
+        doc._raw = data
+        doc._per_chunk = per_chunk
+        doc._data_start = data_start
+
+        for i in range(nchunks):
+            base = table_off + i * rec
+            if per_chunk:
+                ctype, off, size, cid, lv, cflags = struct.unpack_from(
+                    CHUNK_FMT_P, data, base)
+                use_pre = bool(cflags & CHUNK_PRE_RLE)
+            else:
+                ctype, off, size = struct.unpack_from(CHUNK_FMT_S, data, base)
+                cid, lv, use_pre = g_codec, g_level, False
+            if data_start + off + size > len(data):
+                raise BvgChunkError(f"chunk {ctype!r} out of bounds")
+            doc._entries.append((ctype, off, size, cid, lv, use_pre))
+            doc.chunk_order.append(ctype)
+            doc.chunk_meta[ctype] = {"codec": cid, "level": lv,
+                                     "use_pre": use_pre}
+        return doc
+
+    def get_chunk(self, ctype):
+        ctype = bytes(ctype)
+        if ctype in self.chunks:
+            return self.chunks[ctype]
+        if self._raw is None:
+            return None
+        for (t, off, size, cid, lv, pre) in self._entries:
+            if t != ctype:
+                continue
+            comp = self._raw[self._data_start + off:
+                             self._data_start + off + size]
+            raw = C.decompress(comp, cid, lv, rle_prefilter=pre)
+            self.chunks[ctype] = raw
+            return raw
+        return None
 
     def set_chunk(self, ctype, payload, codec=None, level=0, use_pre=None):
         if not isinstance(ctype, (bytes, bytearray)) or len(ctype) != 4:
             raise BvgChunkError(f"chunk type must be 4 bytes, got {ctype!r}")
         ctype = bytes(ctype)
-        if ctype not in self.chunks:
+        if ctype not in self.chunk_order:
             self.chunk_order.append(ctype)
         self.chunks[ctype] = bytes(payload)
         if codec is not None:
@@ -43,56 +108,50 @@ class BvgFile:
             if use_pre is not None:
                 m["use_pre"] = bool(use_pre)
             self.chunk_meta[ctype] = m
-
-    def get_chunk(self, ctype):
-        return self.chunks.get(bytes(ctype))
-
-    def remove_chunk(self, ctype):
-        ctype = bytes(ctype)
-        if ctype in self.chunks:
-            del self.chunks[ctype]
-            self.chunk_order.remove(ctype)
-            self.chunk_meta.pop(ctype, None)
+        self._dirty.add(ctype)
 
     def write(self, path, *, per_chunk=True, rle_prefilter=True,
               default_codec=None, default_level=0):
         encoded = []
-        g_codec_default = default_codec if default_codec is not None else 0
-        g_level_default = default_level
         for ctype in self.chunk_order:
-            raw = self.chunks[ctype]
             m = self.chunk_meta.get(ctype)
+
+            if self._raw is not None and ctype not in self._dirty:
+                ent = next((e for e in self._entries if e[0] == ctype), None)
+                if ent is not None:
+                    _, off, size, cid, lv, pre = ent
+                    comp = self._raw[self._data_start + off:
+                                     self._data_start + off + size]
+                    raw_len = len(C.decompress(comp, cid, lv,
+                                               rle_prefilter=pre))
+                    encoded.append((ctype, cid, lv, comp, raw_len, pre))
+                    continue
+
+            # dirty или с нуля — кодируем
+            raw = self.chunks[ctype]
+            use_pre = rle_prefilter
             if not per_chunk:
                 use_pre = False
-                if default_codec is not None:
-                    cid = default_codec
-                    lv = default_level
-                else:
-                    cid, lv = g_codec_default, g_level_default
+                cid = default_codec if default_codec is not None else 0
+                lv = default_level
             else:
                 if m is not None and "codec" in m:
-                    cid = m["codec"]
-                    lv = m.get("level", 0)
+                    cid = m["codec"]; lv = m.get("level", 0)
                     use_pre = m.get("use_pre", rle_prefilter)
                 elif default_codec is not None:
-                    cid = default_codec
-                    lv = default_level
-                    use_pre = rle_prefilter
+                    cid = default_codec; lv = default_level
                 else:
                     cid, lv, use_pre = C.auto_codec_level(
                         raw, rle_prefilter=rle_prefilter)
             comp = C.compress(raw, cid, lv, rle_prefilter=use_pre)
             encoded.append((ctype, cid, lv, comp, len(raw), use_pre))
 
-        # SPEC 7: FLAG_U32XY is always set by writers in v1
         flags = FLAG_U32XY
         if per_chunk:
             flags |= FLAG_PERCHUNK
-        if self.meta.get("u32xy", False):
-            flags |= FLAG_U32XY
-        if b"THMB" in self.chunks:
+        if b"THMB" in self.chunks or any(e[0] == b"THMB" for e in encoded):
             flags |= FLAG_HAS_THUMB
-        if b"META" in self.chunks:
+        if b"META" in self.chunks or any(e[0] == b"META" for e in encoded):
             flags |= FLAG_HAS_META
 
         if per_chunk or not encoded:
@@ -106,7 +165,7 @@ class BvgFile:
         table = bytearray()
         blob = bytearray()
         offset = 0
-        for ctype, cid, lv, comp, _ul, use_pre in encoded:
+        for ctype, cid, lv, comp, _raw_len, use_pre in encoded:
             if per_chunk:
                 cflags = CHUNK_PRE_RLE if use_pre else 0
                 table += struct.pack(CHUNK_FMT_P, ctype, offset,
@@ -116,11 +175,9 @@ class BvgFile:
             blob += comp
             offset += len(comp)
 
-        header = struct.pack(
-            HEADER_FMT, MAGIC, VERSION, flags,
-            self.width, self.height, len(encoded),
-            g_codec, g_level, total_uncompressed,
-        )
+        header = struct.pack(HEADER_FMT, MAGIC, VERSION, flags,
+                             self.width, self.height, len(encoded),
+                             g_codec, g_level, total_uncompressed)
         with open(path, "wb") as f:
             f.write(header)
             f.write(table)

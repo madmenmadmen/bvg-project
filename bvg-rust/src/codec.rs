@@ -61,32 +61,63 @@ pub fn compress(data: &[u8], cid: u8, level: u8, rle_pre: bool)
     }
 }
 
+/// Декомпрессия одного чанка.
+///
+/// `raw_hint` — опциональная подсказка (начальная ёмкость буфера).
+/// Не обязательна: zstd/lz4 сами определяют размер из фрейма.
+/// `total_uncompressed` из заголовка НЕ используется для декомпрессии
+/// (по спеке это поле необязательное).
 pub fn decompress(data: &[u8], cid: u8, level: u8, rle_pre: bool,
-                  _raw_hint: usize)
+                  raw_hint: usize)
     -> Result<Vec<u8>, BvgError>
 {
-    let _ = level;
+    let _ = level;  // уровень не нужен для декомпрессии
     let out = match cid {
         NONE => data.to_vec(),
+
         ZLIB => {
             let mut dec = flate2::read::ZlibDecoder::new(data);
-            let mut out = Vec::new();
+            let mut out = Vec::with_capacity(if raw_hint > 0 { raw_hint } else { 0 });
             dec.read_to_end(&mut out)
                 .map_err(|e| BvgError::codec(e.to_string()))?;
             out
         }
-        ZSTD => zstd::decode_all(data)
-            .map_err(|e| BvgError::codec(e.to_string()))?,
+
+        ZSTD => {
+            match zstd::zstd_safe::get_frame_content_size(data) {
+                Ok(Some(n)) if n <= usize::MAX as u64 => {
+                    let mut out = vec![0u8; n as usize];
+                    let written = zstd::zstd_safe::decompress(&mut out, data)
+                        .map_err(|e| BvgError::codec(e.to_string()))?;
+                    out.truncate(written);
+                    out
+                }
+                _ => {
+                    let mut dec = zstd::stream::Decoder::new(data)
+                        .map_err(|e| BvgError::codec(e.to_string()))?;
+                    let mut out = Vec::with_capacity(
+                        if raw_hint > 0 { raw_hint } else { 64 * 1024 });
+                    dec.read_to_end(&mut out)
+                        .map_err(|e| BvgError::codec(e.to_string()))?;
+                    out
+                }
+            }
+        }
+
         LZ4 => {
             let mut dec = lz4_flex::frame::FrameDecoder::new(data);
-            let mut out = Vec::new();
+            let mut out = Vec::with_capacity(
+                if raw_hint > 0 { raw_hint } else { 64 * 1024 });
             dec.read_to_end(&mut out)
                 .map_err(|e| BvgError::codec(e.to_string()))?;
             out
         }
+
         RLE => return crate::rle::decode(data),
+
         _ => return Err(BvgError::codec(format!("unknown codec: {}", cid))),
     };
+
     if rle_pre && cid != RLE {
         return crate::rle::decode(&out);
     }
