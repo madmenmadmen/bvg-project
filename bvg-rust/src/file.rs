@@ -51,8 +51,6 @@ impl BvgFile {
         self.dirty.insert(t.to_string());
     }
 
-    /// Lazy: декомпрессит только `t`, кэширует в `chunks`.
-    /// Требует `&mut self` (мутирует кэш).
     pub fn get_chunk(&mut self, t: &str) -> Option<&Vec<u8>> {
         if self.chunks.contains_key(t) {
             return self.chunks.get(t);
@@ -66,13 +64,9 @@ impl BvgFile {
             let pre = self.per_chunk && (e.flags & CHUNK_PRE_RLE != 0);
             let abs = self.data_start + e.offset as usize;
             if abs + e.size as usize > raw.len() {
-                // нельзя вернуть Err из Option — паникуем или логируем;
-                // для корректного API можно вернуть Result, но
-                // сохраняем совместимость с get_chunk -> Option
                 return None;
             }
             let comp = &raw[abs..abs + e.size as usize];
-            // raw_hint = 0: decompress сам определяет размер (zstd/lz4)
             let decoded = match codec::decompress(comp, cid, lv, pre, 0) {
                 Ok(v) => v,
                 Err(_) => return None,
@@ -83,7 +77,6 @@ impl BvgFile {
         None
     }
 
-    /// Lazy: только header + chunk table. Payload'ы не декомпрессируются.
     pub fn read<P: AsRef<Path>>(p: P) -> Result<Self, BvgError> {
         let data = std::fs::read(p)
             .map_err(|e| BvgError::format(e.to_string()))?;
@@ -123,8 +116,6 @@ impl BvgFile {
         Ok(f)
     }
 
-    /// dirty кодирует, остальные копирует байт-в-байт из raw.
-    /// Если raw == None (файл создан с нуля) — кодирует всё.
     pub fn write<P: AsRef<Path>>(&self, p: P, per_chunk: bool,
                                  rle_pre: bool, def_codec: u8,
                                  def_level: u8)

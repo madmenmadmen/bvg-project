@@ -1,5 +1,3 @@
-# tools/gen_testvectors.py
-"""Generate reference BVG files for bvg-spec/testvectors/."""
 from __future__ import annotations
 import binascii
 import json
@@ -46,17 +44,6 @@ def _dump_expected(p: pathlib.Path):
     }
     out = SPEC / "expected" / (p.stem + ".json")
     out.write_text(json.dumps(dump, indent=2), encoding="utf-8")
-
-    # SVG preview (best-effort)
-    try:
-        from bvg.api import from_bvgfile
-        doc = from_bvgfile(f)
-        svg = doc.to_svg()
-        (SPEC / "expected" / (p.stem + ".svg")).write_text(
-            svg, encoding="utf-8")
-    except Exception:
-        pass
-
 
 def _skip(name, reason):
     print(f"  skip {name:<20} {reason}")
@@ -219,7 +206,6 @@ def main():
     gen_all_nodes()
     gen_rle_edge()
     print("done")
-
 
 if __name__ == "__main__":
     main()

@@ -17,8 +17,12 @@ static std::vector<uint8_t> readFile(const std::filesystem::path& p) {
 }
 
 BvgFile BvgFile::read(const std::filesystem::path& p) {
+    return read_from_bytes(readFile(p));
+}
+
+BvgFile BvgFile::read_from_bytes(const std::vector<uint8_t>& data) {
     BvgFile f;
-    f.raw_ = readFile(p);
+    f.raw_ = data;
     auto h = generated::unpackHeader(f.raw_);
     f.perChunk_ = (h.flags & generated::FLAG_PERCHUNK) != 0;
     size_t rec = f.perChunk_ ? generated::CHUNK_SIZE_P

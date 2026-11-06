@@ -2,7 +2,7 @@
 """BVG - Universal Binary Vector Graphics.
 
 Binary chunk-based container for 2D vector graphics.
-See bvg-spec/SPEC.md for the format specification.
+See bvg-spec/README.md for the format specification.
 """
 
 from .container import (

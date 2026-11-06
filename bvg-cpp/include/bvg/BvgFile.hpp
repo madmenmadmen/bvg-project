@@ -34,6 +34,7 @@ public:
                   int codec, int level, bool usePre);
     void write(const std::filesystem::path& p, bool perChunk,
                bool rlePre, int defCodec, int defLevel) const;
+    static BvgFile read_from_bytes(const std::vector<uint8_t>& data);
 
 private:
     std::vector<uint8_t> raw_;
