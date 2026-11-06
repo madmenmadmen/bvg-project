@@ -1,11 +1,13 @@
 [package]
 name = "bvg"
-version = "1.0.2"
+version = "1.0.3"
 edition = "2024"
 description = "BVG - Universal Binary Vector Graphics container"
+readme = "README.md"
 license = "MIT"
 repository = "https://github.com/madmenmadmen/bvg-project"
 homepage = "https://github.com/madmenmadmen/bvg-project"
+documentation = "https://github.com/madmenmadmen/bvg-spec"
 keywords = ["graphics", "vector", "binary", "format", "bvg"]
 categories = ["multimedia::images", "encoding"]
 
