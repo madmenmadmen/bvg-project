@@ -130,7 +130,7 @@ impl BvgFile {
         let mut global_level = 0u8;
 
         for t in &self.order {
-            let mut comp: Vec<u8>;
+            let comp: Vec<u8>;
             let cid: u8;
             let lv: u8;
             let pre: bool;
